@@ -6,6 +6,7 @@ const {
   putDetails,
   geteachdetails,
   deletedetails,
+  searchJobs,
 } = require("../controller/postRequirement");
 const { RegisterUser, LoginUser } = require("../controller/user");
 const { allUsers } = require("../controller/userController");
@@ -15,6 +16,7 @@ const {
   geteachProfile,
   getProfile,
   deleteProfile,
+
 } = require("../controller/uploadProfile");
 
 router.post("/signup", RegisterUser);
@@ -24,6 +26,7 @@ router.get("/getAllusers", allUsers); //changed model from model/jwt.js to model
 
 router.post("/post/job", postJob);
 router.get("/get/jobs", getdetails);
+router.get("/searchJobs", searchJobs);
 router.put("/update/job/:id", putDetails);
 router.get("/geteach/job/:id", geteachdetails);
 router.delete("/delete/job/:id", deletedetails);

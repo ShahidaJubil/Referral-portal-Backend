@@ -2,7 +2,7 @@ const postRequirement = require("../model/postRequirement");
 const express = require("express");
 const multer = require("multer");
 const app = express();
-app.use("/uploads" , express.static("uploads"))
+app.use("/uploads", express.static("uploads"));
 
 const Storage = multer.diskStorage({
   destination: "uploads",
@@ -26,8 +26,8 @@ const postJob = async (req, res) => {
         details: req.body.details,
         location: req.body.location,
         about: req.body.about,
-        hospitalname: req.body.hospitalname,       
-       //image: req.file.path,
+        hospitalname: req.body.hospitalname,
+        //image: req.file.path,
         // filename: req.file.filename,
       });
 
@@ -37,6 +37,21 @@ const postJob = async (req, res) => {
   });
 };
 
+const searchJobs = async (req, res) => {
+  const { hospitalname, location, specialization } = req.query;
+
+  try {
+    const results = await postRequirement.find({
+      ...(hospitalname && { hospitalname: { $regex: new RegExp(hospitalname, "i") } }),
+      ...(location && { location: { $regex: new RegExp(location, "i") } }),
+      ...(specialization && { specialization: { $regex: new RegExp(specialization, "i") } }),
+    });
+
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const putDetails = async (req, res) => {
   try {
@@ -66,7 +81,6 @@ const deletedetails = async (req, res) => {
   }
 };
 
-
 const getdetails = async (req, res) => {
   try {
     const details = await postRequirement.find();
@@ -84,15 +98,11 @@ const geteachdetails = async (req, res) => {
   }
 };
 
-
 module.exports = {
   postJob,
   deletedetails,
   getdetails,
   geteachdetails,
   putDetails,
-
+  searchJobs,
 };
-
-
-
