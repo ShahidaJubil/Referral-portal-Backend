@@ -1,4 +1,4 @@
-const User = require("../model/model.js");
+const User = require("../model/UploadProfile");
 
 //load all users
 exports.allUsers = async (req, res, next) => {

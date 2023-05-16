@@ -1,55 +1,59 @@
 const { boolean } = require("joi");
 const mongoose = require("mongoose");
-const {ObjectId}=mongoose.Schema
 
-const postRequirement = new mongoose.Schema({
-  job: {
-    type: String,
-    required: true,
-  },
+const postRequirement = new mongoose.Schema(
+  {
+    job: {
+      type: String,
+      required: true,
+    },
 
-  specialization: {
-    type: String,
-    // required: true,
+    specialization: {
+      type: String,
+      // required: true,
+    },
+    location: {
+      type: String,
+      required: true,
+    },
+    experience: {
+      type: Number,
+      required: true,
+    },
+    details: {
+      type: String,
+    },
+    image: {
+      type: String,
+      get: (image) => `http://localhost:5000/${image}`,
+    },
+    filename: {
+      type: String,
+    },
+    hospitalname: {
+      type: String,
+    },
+    about: {
+      type: String,
+    },
+    facilities: {
+      type: String,
+    },
+    available: {
+      type: Boolean,
+      default: true,
+    },
+    // user: [{ type: mongoose.Schema.Types.ObjectId }],
+    // // ref: "user",
+    user : {
+      type : [mongoose.Schema.Types.ObjectId],
+      default:[]
+    }
   },
-  location: {
-    type: String,
-    required: true,
+  {
+    toJSON: { getters: true },
   },
-  experience: {
-    type: Number,
-    required: true,
-  },
-  details: {
-    type: String,
-   
-  },
-  image: {
-    type: String,
-    get: (image) => `http://localhost:5000/${image}`,
-  },
-  filename:{
-    type:String
-  },
-  hospitalname:{
-    type:String
-  },
-  about:{
-    type:String
-  },
-  facilities:{
-    type:String
-  },
-  available:{
-    type:Boolean,
-    default:true
-  },
-  user:{
-    type:ObjectId,
-    ref:"JWT"
-  }
-},{
-  toJSON: { getters: true },
-},{timestamps:true});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("postRequirement", postRequirement);

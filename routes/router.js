@@ -16,13 +16,27 @@ const {
   geteachProfile,
   getProfile,
   deleteProfile,
+  getUserProfile,
 
 } = require("../controller/uploadProfile");
+
+const {
+  applyJob,
+  getApplications,
+  checkApplications,
+} = require("../controller/jobApplication");
 
 router.post("/signup", RegisterUser);
 router.post("/login", LoginUser);
 
 router.get("/getAllusers", allUsers); //changed model from model/jwt.js to model/model.js,added require and route
+
+router.post("/jobs/apply",applyJob);
+router.get("/jobs/get",getApplications);
+router.post("/jobs/check",checkApplications);
+
+
+
 
 router.post("/post/job", postJob);
 router.get("/get/jobs", getdetails);
@@ -32,6 +46,7 @@ router.get("/geteach/job/:id", geteachdetails);
 router.delete("/delete/job/:id", deletedetails);
 
 router.post("/profile/add", postProfile);
+router.post("/profile", getUserProfile);
 router.get("/profile/get", getProfile);
 router.put("/profile/update/:id", putProfile);
 router.get("/profile/:id", geteachProfile);

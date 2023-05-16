@@ -10,14 +10,23 @@ const apiModel = new mongoose.Schema({
     type: String,
     required: true,
   },
-  confirmpassword:{
+  confirmpassword: {
     type: String,
     required: false,
   },
-  name:{
-    type:String
+  name: {
+    type: String,
   },
-
+  role: {
+    type: String,
+    required: false,
+    enum: ["user", "admin", "guest"],
+  },
+  profileId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "profile",
+  },
 });
+
 
 module.exports = mongoose.model("userapi", apiModel);

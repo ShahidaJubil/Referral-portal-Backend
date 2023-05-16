@@ -2,8 +2,7 @@ const uploadProfile = require("../model/UploadProfile");
 const multer = require("multer");
 const express = require("express");
 const app = express();
-app.use("/uploads" , express.static("uploads"))
-
+app.use("/uploads", express.static("uploads"));
 
 const Storage = multer.diskStorage({
   destination: "uploads",
@@ -28,7 +27,7 @@ const postProfile = async (req, res) => {
         address: req.body.address,
         title: req.body.title,
         contact: req.body.contact,
-        image: req.file.path,
+        // image: req.file.path,
         location: req.body.location,
         // cv: {
         //   data: req.file.filename,
@@ -79,16 +78,32 @@ const getProfile = async (req, res) => {
 };
 const geteachProfile = async (req, res) => {
   try {
-    const details = await uploadProfile.findById(req.params.id);
+    const details = await uploadProfile.findById(req.params._id);
+    console.log("idp", req.params.id);
+    console.log("details", details);
     res.status(200).json(details);
   } catch (err) {
     res.status(500).json(err.message);
   }
 };
+
+const getUserProfile = async (req, res) => {
+  try {
+    const { proId } = req.body;
+    const userProfile = await uploadProfile.findById(proId);
+    console.log("idp", proId);
+    console.log("userP",userProfile);
+    res.status(200).json(userProfile);
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 module.exports = {
   postProfile,
   putProfile,
   geteachProfile,
   getProfile,
   deleteProfile,
+  getUserProfile,
 };

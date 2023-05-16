@@ -1,4 +1,5 @@
 const postRequirement = require("../model/postRequirement");
+const User = require("../model/jobApplication");
 const express = require("express");
 const multer = require("multer");
 const app = express();
@@ -42,9 +43,13 @@ const searchJobs = async (req, res) => {
 
   try {
     const results = await postRequirement.find({
-      ...(hospitalname && { hospitalname: { $regex: new RegExp(hospitalname, "i") } }),
+      ...(hospitalname && {
+        hospitalname: { $regex: new RegExp(hospitalname, "i") },
+      }),
       ...(location && { location: { $regex: new RegExp(location, "i") } }),
-      ...(specialization && { specialization: { $regex: new RegExp(specialization, "i") } }),
+      ...(specialization && {
+        specialization: { $regex: new RegExp(specialization, "i") },
+      }),
     });
 
     res.json(results);
@@ -84,11 +89,35 @@ const deletedetails = async (req, res) => {
 const getdetails = async (req, res) => {
   try {
     const details = await postRequirement.find();
+    // await details.populate(details, { path: 'user', model: 'User' });
+
     res.json(details);
   } catch (err) {
     res.status(500).json(err.message);
   }
 };
+// const getdetails = async (req, res) => {
+//   try {
+//     const details = await postRequirement.find();
+//     const populatedDetails = await postRequirement.populate(details, { path: 'user', model: 'User' });
+
+//     const jobIds = populatedDetails.map((job) => job.id);
+//     const jobApps = await User.find({ jobId: { $in: jobIds } }).populate('userId');
+
+//     const jobsWithUsers = populatedDetails.map((job) => {
+//       const matchingJobApp = jobApps.find((app) => app.jobId === job.id);
+//       if (matchingJobApp) {
+//         return { ...job.toObject(), user: matchingJobApp.userId };
+//       } else {
+//         return job;
+//       }
+//     });
+
+//     res.json(jobsWithUsers);
+//   } catch (err) {
+//     res.status(500).json(err.message);
+//   }
+// };
 const geteachdetails = async (req, res) => {
   try {
     const details = await postRequirement.findById(req.params.id);
