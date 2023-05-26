@@ -7,7 +7,6 @@ const postRequirement = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     specialization: {
       type: String,
       // required: true,
@@ -32,6 +31,11 @@ const postRequirement = new mongoose.Schema(
     },
     hospitalname: {
       type: String,
+    },
+    hospitalId : {
+      type : mongoose.Schema.Types.ObjectId,
+      required : false , // Must be set to true after flushing the DB. Do so now may cause bugs.
+      ref : "hospitals",
     },
     about: {
       type: String,

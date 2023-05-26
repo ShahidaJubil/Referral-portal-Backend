@@ -10,10 +10,10 @@ const apiModel = new mongoose.Schema({
     type: String,
     required: true,
   },
-  confirmpassword: {
-    type: String,
-    required: false,
-  },
+  // confirmpassword: {
+  //   type: String,
+  //   required: false,
+  // },
   name: {
     type: String,
   },
@@ -25,6 +25,11 @@ const apiModel = new mongoose.Schema({
   profileId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "profile",
+  },
+  jobsApplied : {
+    type : [mongoose.Schema.Types.ObjectId],
+    default : [],
+    ref : "postRequirement",
   },
 });
 

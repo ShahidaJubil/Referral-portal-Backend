@@ -1,5 +1,7 @@
 const postRequirement = require("../model/postRequirement");
-const User = require("../model/jobApplication");
+const Hospital = require("../model/hospitalModel");
+const User = require("../model/model");
+const JobApp = require("../model/jobApplication");
 const express = require("express");
 const multer = require("multer");
 const app = express();
@@ -15,25 +17,37 @@ const upload = multer({
   storage: Storage,
 }).single("image");
 
+
 const postJob = async (req, res) => {
-  upload(req, res, (err) => {
+  upload(req, res, async (err) => {
     if (err) {
       console.log(err);
     } else {
-      const job = new postRequirement({
-        job: req.body.job,
-        specialization: req.body.specialization,
-        experience: req.body.experience,
-        details: req.body.details,
-        location: req.body.location,
-        about: req.body.about,
-        hospitalname: req.body.hospitalname,
-        //image: req.file.path,
-        // filename: req.file.filename,
-      });
+      try {
+        const job = new postRequirement({
+          job: req.body.job,
+          specialization: req.body.specialization,
+          experience: req.body.experience,
+          details: req.body.details,
+          location: req.body.location,
+          about: req.body.about,
+          hospitalname: req.body.hospitalname,
+          hospitalId: req.body.hospitalId,
+        });
 
-      const jobDetails = job.save();
-      res.json(job);
+        // Save the job
+        const savedJob = await job.save();
+
+        // Update the postedJobs field of the corresponding hospital
+        await Hospital.findByIdAndUpdate(req.body.hospitalId, {
+          $push: { postedJobs: savedJob._id },
+        });
+
+        res.json(savedJob);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   });
 };
@@ -79,10 +93,30 @@ const putDetails = async (req, res) => {
 
 const deletedetails = async (req, res) => {
   try {
-    const details = await postRequirement.findByIdAndDelete(req.params.id);
-    res.status(200).json("deleted");
-  } catch (err) {
-    res.status(500).json(err.message);
+    const jobId = req.params.id;
+
+    // Remove the job from the schema holding all the available jobs
+    const deletedJob = await postRequirement.findByIdAndRemove(jobId);
+
+    if (!deletedJob) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    // Remove the job ID from the postedJobs field of the corresponding hospital
+    await Hospital.findByIdAndUpdate(deletedJob.hospitalId, {
+      $pull: { postedJobs: deletedJob._id },
+    });
+
+    // Remove the job from the JobApp schema
+    await JobApp.deleteMany({ jobId: deletedJob._id });
+
+    // Remove the job ID from the jobsApplied field of userapi schema
+    await User.updateMany({}, { $pull: { jobsApplied: deletedJob._id } });
+
+    res.json({ message: "Job deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
