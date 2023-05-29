@@ -1,4 +1,4 @@
-const uploadProfile = require("../model/UploadProfile");
+const uploadProfile = require("../model/model");
 const multer = require("multer");
 const express = require("express");
 const app = express();
@@ -20,15 +20,14 @@ const postProfile = async (req, res) => {
       console.log(err);
     } else {
       const profile = new uploadProfile({
-        name: req.body.name,
-        email: req.body.email,
+        name: req.body.name,  
+        // email: req.body.email,
         specialization: req.body.specialization,
         experience: req.body.experience,
         address: req.body.address,
         title: req.body.title,
         contact: req.body.contact,
         // image: req.file.path,
-        location: req.body.location,
         // cv: {
         //   data: req.file.filename,
         //   contentType: "pdf/doc",
@@ -59,14 +58,6 @@ const putProfile = async (req, res) => {
   }
 };
 
-const deleteProfile = async (req, res) => {
-  try {
-    await uploadProfile.findByIdAndDelete(req.params.id);
-    res.status(200).json("deleted");
-  } catch (err) {
-    res.status(500).json(err.message);
-  }
-};
 
 const getProfile = async (req, res) => {
   try {
@@ -76,11 +67,12 @@ const getProfile = async (req, res) => {
     res.status(500).json(err.message);
   }
 };
+
 const geteachProfile = async (req, res) => {
   try {
-    const details = await uploadProfile.findById(req.params._id);
-    console.log("idp", req.params.id);
-    console.log("details", details);
+    const details = await uploadProfile.findById(req.params.id);
+    // console.log("idp", req.params.id);
+    // console.log("details", details);
     res.status(200).json(details);
   } catch (err) {
     res.status(500).json(err.message);
@@ -104,6 +96,5 @@ module.exports = {
   putProfile,
   geteachProfile,
   getProfile,
-  deleteProfile,
   getUserProfile,
 };

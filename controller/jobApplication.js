@@ -11,17 +11,29 @@ app.use("/uploads", express.static("uploads"));
 const applyJob = async (req, res) => {
   try {
     const { userId, jobId } = req.body;
-    const usr = await User.findById(userId);
+    const user = await User.findById(userId);
     const job = await JobList.findById(jobId);
-    if (!usr || !job) {
+    if (!user || !job) {
       return res.status(404).json({ message: "User or job not found" });
     }
 
-    const userJob = new UserJob({ userId, jobId, status: "Applied" });
-    await userJob.save();
+    // Check if the user has already applied for the job
+    const applicationExists = user.jobsApplied.some(
+      (application) => application.jobId.toString() === jobId
+    );
+    if (applicationExists) {
+      return res
+        .status(400)
+        .json({ message: "Job application already exists" });
+    }
+
+    // Add the job application to the user's jobsApplied array with status "not applied" or "apply now"
+    user.jobsApplied.push({ jobId, status: "Applied" });
+    await user.save();
 
     // Update the user field of the JobList schema
-    await JobList.updateOne({ _id: jobId }, { $addToSet: { user: userId } });
+    job.user.push(userId);
+    await job.save();
 
     return res
       .status(201)
@@ -44,38 +56,60 @@ const getApplications = async (req, res) => {
 const checkApplications = async (req, res) => {
   try {
     const { userId, jobId } = req.body;
-    const application = await UserJob.findOne({ userId, jobId });
-    if (application) {
-      return res.json({ success: "true" });
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-    return res.json({ success: "false" });
-  } catch (err) {
-    console.error(err);
-    return res.json({ message: "Check Application :Server Error", err });
+
+    const jobApplication = user.jobsApplied.find(
+      (application) => application.jobId.toString() === jobId
+    );
+
+    if (jobApplication) {
+      const jobStatus = jobApplication.status;
+      const disabled = jobStatus === "Rejected";
+
+      return res.json({ success: true, status: jobStatus, disabled });
+    }
+
+    return res.json({ success: false ,status: "Apply Now"});
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Check Application: Server Error" });
   }
 };
 
+
 const userApplication = async (req, res) => {
   try {
-    // const { userId } = req.body;
-    const user = await User.findById(req.params.id);
+    const userId = req.params.id; // Assuming you have authentication middleware
+
+    const user = await User
+      .findById(userId)
+      .populate("jobsApplied.jobId", "job hospitalname");
+
     if (!user) {
-      return res.status(404).json({ error: "No such user found." });
+      return res.status(404).json({ error: "User not found" });
     }
-    console.log("Found User!!");
-    if (user.jobsApplied.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No applications submitted yet." });
-    }
-    console.log("Found Applications!!", user.jobsApplied);
-    const applications = user.jobsApplied;
-    return res.status(200).json({ applications });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Internal Server Error" });
+
+    const jobApplications = user.jobsApplied.map((application) => ({
+      jobId: {
+        _id: application.jobId._id,
+        job: application.jobId.job,
+        hospitalname: application.jobId.hospitalname,
+      },
+      status: application.status,
+    }));
+
+    res.json({ jobApplications });
+  } catch (error) {
+    console.error("Error fetching job applications:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
+
 
 const userRemoveApplication = async (req, res) => {
   try {
@@ -90,22 +124,29 @@ const userRemoveApplication = async (req, res) => {
     }
 
     const job = await JobList.findById(jobId);
-    if(!job){
-      return res.status(404).json({error : "Unable to find the Job."});
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
     }
 
-    // Remove the applicationId from the jobsApplied field
-    const index = user.jobsApplied.indexOf(jobId);
-    if (index !== -1) {
-      user.jobsApplied.splice(index, 1);
-      await user.save();
+    // Check if the user has applied for the job
+    const application = user.jobsApplied.find(
+      (application) => application.jobId.toString() === jobId
+    );
+    if (!application) {
+      return res
+        .status(404)
+        .json({ error: "Job application not found for this user" });
     }
 
-    const userIndex = job.user.indexOf(userId);
-    if(index !== -1) {
-      job.user.splice(userIndex,1);
-      await job.save();
-    } 
+    // Remove the application from the jobsApplied field in the user schema
+    user.jobsApplied = user.jobsApplied.filter(
+      (application) => application.jobId.toString() !== jobId
+    );
+    await user.save();
+
+    // Remove the user from the user field in the job schema
+    job.user = job.user.filter((id) => id.toString() !== userId);
+    await job.save();
 
     res.json({ message: "Application removed successfully" });
   } catch (error) {
@@ -119,5 +160,5 @@ module.exports = {
   getApplications,
   checkApplications,
   userApplication,
-  userRemoveApplication
+  userRemoveApplication,
 };

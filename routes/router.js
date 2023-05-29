@@ -38,16 +38,15 @@ const {
   deletedetails,
   searchJobs,
 } = require("../controller/postRequirement");
-const { RegisterUser, LoginUser } = require("../controller/user");
+const { RegisterUser, LoginUser, DeleteUser } = require("../controller/user");
 const { allUsers } = require("../controller/userController");
 const {
   postProfile,
   putProfile,
   geteachProfile,
   getProfile,
-  deleteProfile,
   getUserProfile,
-} = require("../controller/uploadProfile");
+} = require("../controller/profileController");
 
 const {
   applyJob,
@@ -59,6 +58,7 @@ const {
 
 router.post("/signup", RegisterUser);
 router.post("/login", LoginUser);
+router.delete("/user/delete/:id",DeleteUser);
 
 router.get("/getAllHosp", getAllHospital);
 router.get("/getHosp/:id", getEachHospital);
@@ -89,7 +89,6 @@ router.post("/profile", getUserProfile);
 router.get("/profile/get", getProfile);
 router.put("/profile/update/:id", putProfile);
 router.get("/profile/:id", geteachProfile);
-router.delete("/profile/delete/:id", deleteProfile);
 
 // router.post("/jwt/signup", jwtSignup);
 // router.post("/jwt/signin", jwtSignin);
@@ -104,10 +103,11 @@ router.delete("/profile/delete/:id", deleteProfile);
 // router.get("/type/jobs", allJobsType);
 // router.post("/type/create", createJobType);
 
-const { formatJobApp , removeDuplicates } = require("../controller/dataController");
+// const { formatJobApp , removeDuplicates, fillFields } = require("../controller/dataController");
 
-router.post("/formatJobs",formatJobApp);
-router.delete("/removeDuplicates",removeDuplicates);
+// router.post("/formatJobs",formatJobApp);
+// router.delete("/removeDuplicates",removeDuplicates);
+// router.get("/fill/fields",fillFields)
 
 
 module.exports = router;

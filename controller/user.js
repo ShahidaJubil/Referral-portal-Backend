@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../model/model");
-const Profile = require("../model/UploadProfile");
+// const Profile = require("../model/UploadProfile");
+const Jobs = require("../model/postRequirement");
 const createError = require("http-errors");
 const express = require("express");
 const app = express();
@@ -186,4 +187,29 @@ const LoginUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { RegisterUser, LoginUser };
+const DeleteUser = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Delete the user by their ID
+    await User.findByIdAndRemove(userId);
+    console.log("Deleted User.")
+
+    // Remove any existing user job applications
+    await Jobs.updateMany({ user: userId }, { $pull: { user: userId } });
+    console.log("Removed User Applications if exists.");
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+};
+
+module.exports = { RegisterUser, LoginUser , DeleteUser };

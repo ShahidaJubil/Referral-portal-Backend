@@ -22,10 +22,10 @@ const postRequirement = new mongoose.Schema(
     details: {
       type: String,
     },
-    image: {
-      type: String,
-      get: (image) => `http://localhost:5000/${image}`,
-    },
+    // image: {
+    //   type: String,
+    //   get: (image) => `http://localhost:5000/${image}`,
+    // },
     filename: {
       type: String,
     },

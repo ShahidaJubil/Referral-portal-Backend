@@ -10,10 +10,6 @@ const apiModel = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // confirmpassword: {
-  //   type: String,
-  //   required: false,
-  // },
   name: {
     type: String,
   },
@@ -22,16 +18,47 @@ const apiModel = new mongoose.Schema({
     required: false,
     enum: ["user", "admin", "guest"],
   },
-  profileId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "profile",
+  profile: {
+    title: {
+      type: String,
+      required: false,
+    },
+    specialization: {
+      type: String,
+    },
+    experience: {
+      type: String,
+      required: false,
+    },
+    contact: {
+      type: Number,
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    image: {
+      type: String,
+      get: (image) => `http://localhost:5000/${image}`,
+    },
+    location: {
+      type: String,
+    },
   },
-  jobsApplied : {
-    type : [mongoose.Schema.Types.ObjectId],
-    default : [],
-    ref : "postRequirement",
-  },
+  jobsApplied: [
+    {
+      jobId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "postRequirement",
+      },
+      status: {
+        type: String,
+        enum: ["Apply", "Applied", "Pending", "Scheduled", "Rejected"],
+        default: "Apply Now",
+      },
+    },
+  ],
 });
-
 
 module.exports = mongoose.model("users", apiModel);
