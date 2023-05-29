@@ -34,4 +34,4 @@ const apiModel = new mongoose.Schema({
 });
 
 
-module.exports = mongoose.model("userapi", apiModel);
+module.exports = mongoose.model("users", apiModel);
