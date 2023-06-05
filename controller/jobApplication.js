@@ -1,4 +1,4 @@
-const postRequirement = require("../model/JobsModel");
+// const postRequirement = require("../model/JobsModel");
 const express = require("express");
 const multer = require("multer");
 const User = require("../model/model");

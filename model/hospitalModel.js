@@ -28,7 +28,7 @@ const hospitalModel = new mongoose.Schema({
   postedJobs : {
     type : [mongoose.Schema.Types.ObjectId],
     default : [],
-    ref : "postRequirement"
+    ref : "JobsModel"
   },
   applications : {
     type : [mongoose.Schema.Types.ObjectId],

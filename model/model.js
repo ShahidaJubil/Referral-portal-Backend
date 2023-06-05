@@ -50,7 +50,7 @@ const apiModel = new mongoose.Schema({
     {
       jobId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "postRequirement",
+        ref: "JobsModel",
       },
       status: {
         type: String,
