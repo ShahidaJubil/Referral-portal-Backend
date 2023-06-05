@@ -1,5 +1,5 @@
 const Hospital = require("../model/hospitalModel");
-const Jobs = require("../model/postRequirement");
+const Jobs = require("../model/JobsModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 

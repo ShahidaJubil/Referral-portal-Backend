@@ -37,7 +37,7 @@ const {
   geteachdetails,
   deletedetails,
   searchJobs,
-} = require("../controller/postRequirement");
+} = require("../controller/jobsController");
 const { RegisterUser, LoginUser, DeleteUser } = require("../controller/user");
 const { allUsers } = require("../controller/userController");
 const {

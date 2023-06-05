@@ -1,4 +1,4 @@
-const postRequirement = require("../model/postRequirement");
+const postRequirement = require("../model/JobsModel");
 const Hospital = require("../model/hospitalModel");
 const User = require("../model/model");
 const JobApp = require("../model/jobApplication");

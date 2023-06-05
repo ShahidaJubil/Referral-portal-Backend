@@ -1,8 +1,8 @@
-const postRequirement = require("../model/postRequirement");
+const postRequirement = require("../model/JobsModel");
 const express = require("express");
 const multer = require("multer");
 const User = require("../model/model");
-const JobList = require("../model/postRequirement");
+const JobList = require("../model/JobsModel");
 const UserJob = require("../model/jobApplication");
 
 const app = express();

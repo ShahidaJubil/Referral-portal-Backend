@@ -1,7 +1,7 @@
 const { boolean } = require("joi");
 const mongoose = require("mongoose");
 
-const postRequirement = new mongoose.Schema(
+const JobsModel = new mongoose.Schema(
   {
     job: {
       type: String,
@@ -60,4 +60,4 @@ const postRequirement = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("postRequirement", postRequirement);
+module.exports = mongoose.model("JobsModel", JobsModel);
