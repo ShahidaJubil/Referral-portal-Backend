@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 const apiModel = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
+    required: false,
     match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
   },
   password: {
     type: String,
-    required: true,
+    required: false,
   },
   name: {
     type: String,
@@ -16,16 +16,17 @@ const apiModel = new mongoose.Schema({
   role: {
     type: String,
     required: false,
-    enum: ["user", "admin", "guest"],
+    enum: ["mentor", "student", "guest"],
   },
-  profile: {
+  specialization: {
+    type: String,
+  },
+
     title: {
       type: String,
       required: false,
     },
-    specialization: {
-      type: String,
-    },
+
     experience: {
       type: String,
       required: false,
@@ -45,20 +46,7 @@ const apiModel = new mongoose.Schema({
     location: {
       type: String,
     },
-  },
-  jobsApplied: [
-    {
-      jobId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "JobsModel",
-      },
-      status: {
-        type: String,
-        enum: ["Apply", "Applied", "Pending", "Scheduled", "Rejected"],
-        default: "Apply Now",
-      },
-    },
-  ],
+    earnedPoints: Number,
 });
 
 module.exports = mongoose.model("users", apiModel);

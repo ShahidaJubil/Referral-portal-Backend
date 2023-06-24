@@ -1,11 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const routes = require("./routes/router");
-const router = require("./routes/PremiumRouter");
+const router = require("./routes/router");
+const imgRouter=require("./routes/Image")
 const app = express();
 const cors = require("cors");
-const verifyJWT = require("./middleware/verifyJWT")
-const JWT = require("./controller/jwt")
 require("dotenv").config();
 const session = require("express-session");
 
@@ -44,8 +42,9 @@ app.use(
   })
 );
 app.use(express.json());
-app.use("/api", routes);
+
 app.use("/api", router);
+app.use("/api", imgRouter);
 
 // app.use(JWT);
 // app.use(verifyJWT);

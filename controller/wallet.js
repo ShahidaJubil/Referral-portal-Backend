@@ -1,4 +1,4 @@
-const bcrypt = require("bcryptjs");
+
 const asyncHandler = require("express-async-handler");
 const User = require("../model/model");
 const createError = require("http-errors");
@@ -44,7 +44,7 @@ const RegisterUser = asyncHandler(async (req, res) => {
       password: hashedPassword,
       name,
       specialization,experience,contact,
-      role: "mentor" // Assigning the role 
+      role: "mentor" // Assigning the role field
       // profileId: savedProfile._id, // set the profile reference in the user model
     });
     try {
@@ -113,6 +113,6 @@ const DeleteUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Server Error' });
   }
-}
+};
 
 module.exports = { RegisterUser, LoginUser , DeleteUser };
