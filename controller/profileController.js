@@ -1,4 +1,5 @@
 const uploadProfile = require("../model/model");
+const ImageModel=require("../model/ImageModel")
 const multer = require("multer");
 const express = require("express");
 const app = express();
@@ -14,25 +15,55 @@ const upload = multer({
   storage: Storage,
 }).single("image");
 
+
+const refer = async (req, res) => {
+  const {
+    fname1,
+    lname2,
+    name,
+    course,
+    contact,
+    duration
+  } = req.body;
+  upload(req, res, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const profile = new ImageModel({
+        refer:{
+         
+        lname2:req.body.lname2, 
+        email: req.body.email,
+        contact: req.body.contact,
+        
+        course:req.body.course,
+        duration:req.body.duration
+      },
+      location: req.body.location,
+      fname1: req.body.fname1,
+      });
+
+      profile.save();
+      res.json(profile);
+    }
+  });
+};
+
 const postProfile = async (req, res) => {
   upload(req, res, (err) => {
     if (err) {
       console.log(err);
     } else {
       const profile = new uploadProfile({
-        name: req.body.name,  
-        // email: req.body.email,
-        specialization: req.body.specialization,
-        experience: req.body.experience,
-        address: req.body.address,
-        title: req.body.title,
+        fname: req.body.fname,  
+        lname: req.body.lname, 
+        email: req.body.email,
         contact: req.body.contact,
-        // image: req.file.path,
-        // cv: {
-        //   data: req.file.filename,
-        //   contentType: "pdf/doc",
-        // },
+        course: req.body.course,
+        duration: req.body.duration,
+        contact: req.body.contact,
         location: req.body.location,
+        
       });
 
       profile.save();
@@ -48,9 +79,8 @@ const putProfile = async (req, res) => {
     check.title = req.body.title;
     check.contact = req.body.contact;
     (check.location = req.body.location),
-      (check.specialization = req.body.specialization);
-    check.experience = req.body.experience;
-    check.details = req.body.details;
+    (check.contact = req.body.contact);
+    check.course = req.body.course;
     const a3 = await check.save();
     res.json(a3);
   } catch (error) {
@@ -97,4 +127,5 @@ module.exports = {
   geteachProfile,
   getProfile,
   getUserProfile,
+  refer
 };

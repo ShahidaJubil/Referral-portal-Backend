@@ -6,47 +6,27 @@ const apiModel = new mongoose.Schema({
     required: false,
     match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
   },
-  password: {
+  lname: {
     type: String,
     required: false,
   },
-  name: {
+  fname: {
     type: String,
   },
-  role: {
-    type: String,
-    required: false,
-    enum: ["mentor", "student", "guest"],
-  },
-  specialization: {
-    type: String,
-  },
-
-    title: {
-      type: String,
-      required: false,
-    },
-
-    experience: {
-      type: String,
-      required: false,
-    },
     contact: {
       type: Number,
       required: false,
     },
-    address: {
-      type: String,
-      required: false,
-    },
-    image: {
-      type: String,
-      get: (image) => `http://localhost:5000/${image}`,
-    },
+
     location: {
       type: String,
     },
-    earnedPoints: Number,
+    course:{
+      type:String
+    },
+    duration:{
+      type:String
+    }
 });
 
 module.exports = mongoose.model("users", apiModel);
