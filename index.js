@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const router = require("./routes/router");
+const PasswordRouter = require("./controller/PasswordReset");
 const imgRouter=require("./routes/Image")
 const app = express();
 const cors = require("cors");
@@ -44,6 +45,7 @@ app.use(
 app.use(express.json());
 
 app.use("/api", router);
+app.use("/api", PasswordRouter);
 app.use("/api", imgRouter);
 
 // app.use(JWT);

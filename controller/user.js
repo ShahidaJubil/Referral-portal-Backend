@@ -8,7 +8,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const JWT = require("./jwt");
 const { generateUniqueId } = require("../utils"); // Replace './utils' with the actual path to your utility file
-const mongoose=require('mongoose')
+const mongoose = require("mongoose");
+const { updateExcelSheet } = require("./Excel");
 
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -106,6 +107,33 @@ const LoginUser = asyncHandler(async (req, res, next) => {
     return next(createError(500, err.message));
   }
 });
+
+// POST route to handle the "Forgot Password" request
+const ChangePassword = asyncHandler(async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    // Check if the email exists in the database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email not found" });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password with the new hashed password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 // Generating a referral link
 function generateReferralLink(userId) {
   const uniqueId = generateUniqueId(); // Implement this function to generate a unique identifier
@@ -140,7 +168,6 @@ const GetUser = async (req, res) => {
   if (!userId || !mongoose.isValidObjectId(userId)) {
     return res.status(400).json({ error: "Invalid user ID" });
   }
-
 
   try {
     // Find the user by their ID
@@ -187,8 +214,7 @@ const PutUser = async (req, res) => {
   }
 };
 
-
-const postReferral= async (req, res) => {
+const postReferral = async (req, res) => {
   const userId = req.params.userId;
 
   try {
@@ -196,7 +222,7 @@ const postReferral= async (req, res) => {
     const userProfile = await User.findById(userId);
 
     if (!userProfile) {
-      return res.status(404).json({ message: 'User profile not found' });
+      return res.status(404).json({ message: "User profile not found" });
     }
 
     // Create a new referral object from the request body
@@ -208,6 +234,7 @@ const postReferral= async (req, res) => {
       rlocation: req.body.rlocation,
       rcourse: req.body.rcourse,
       rduration: req.body.rduration,
+      rstatus: req.body.rstatus,
     };
 
     // Add the new referral to the user's refers array
@@ -216,12 +243,217 @@ const postReferral= async (req, res) => {
     // Save the updated user profile
     const updatedProfile = await userProfile.save();
 
-    res.status(201).json(updatedProfile);
+    // Call updateExcelSheet to update the Excel file
+    const existingExcelFilePath =
+      "C:\\Users\\shahi\\Documents\\studyMEDIC\\Referal Portar\\Referral-Portal.xlsx";
+    const updatedExcelFilePath = updateExcelSheet(
+      existingExcelFilePath,
+      userProfile.refers
+    );
+
+    // Send the updated Excel file path as a response
+    res.status(201).json({ updatedExcelFilePath });
+
+    // No need to send the userProfile as a response, as it's already saved in the Excel file
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 
-module.exports = { RegisterUser, LoginUser, DeleteUser, GetUser, PutUser,postReferral};
+const putReferral = async (req, res) => {
+  const userId = req.params.userId;
+  const referralId = req.params.referralId;
+
+  try {
+    // Find the user profile by user ID
+    const userProfile = await User.findById(userId);
+
+    if (!userProfile) {
+      return res.status(404).json({ message: "User profile not found" });
+    }
+
+    // Find the referral within the user's refers array
+    const referralIndex = userProfile.refers.findIndex(
+      (referral) => referral._id.toString() === referralId
+    );
+
+    if (referralIndex === -1) {
+      return res.status(404).json({ message: "Referral not found" });
+    }
+
+    // Update the referral with the new data from the request body
+    userProfile.refers[referralIndex].remail = req.body.remail;
+    userProfile.refers[referralIndex].rlname = req.body.rlname;
+    userProfile.refers[referralIndex].rfname = req.body.rfname;
+    userProfile.refers[referralIndex].rcontact = req.body.rcontact;
+    userProfile.refers[referralIndex].rlocation = req.body.rlocation;
+    userProfile.refers[referralIndex].rcourse = req.body.rcourse;
+    userProfile.refers[referralIndex].rduration = req.body.rduration;
+    userProfile.refers[referralIndex].rstatus = req.body.rstatus;
+
+    // Save the updated user profile
+    await userProfile.save();
+
+    return res.json({ message: "Referral updated successfully" });
+  } catch (error) {
+    console.log("error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const successReferrals = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Find the user profile by user ID
+    const userProfile = await User.findById(userId);
+
+    if (!userProfile) {
+      return res.status(404).json({ message: "User profile not found" });
+    }
+
+    // Create a new referral object from the request body
+    const successReferral = {
+      slname: req.body.slname,
+      sfname: req.body.sfname,
+      scourse: req.body.scourse,
+      srduration: req.body.srduration,
+      points: req.body.points,
+    };
+
+    // Add the new referral to the user's refers array
+    userProfile.successReferrals.push(successReferral);
+
+    // Save the updated user profile
+    const updatedProfile = await userProfile.save();
+
+    res.status(201).json(updatedProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Route to get the referral details of all users
+const getAllReferrals = async (req, res) => {
+  try {
+    // Find all users in the database
+    const allUsers = await User.find({});
+
+    // Create an array to store the referral details of all users
+    const allReferrals = [];
+
+    // Iterate through each user to retrieve their referral details
+    for (const user of allUsers) {
+      // Retrieve the user's referral details
+      const referralDetails = {
+        userId: user._id,
+        fname: user.fname,
+        lname: user.lname,
+        refers: user.refers,
+      };
+
+      // Add the referral details to the array
+      allReferrals.push(referralDetails);
+    }
+
+    // Return the array of all referral details
+    res.status(200).json({ allReferrals });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// const updateReferralStatus = async (req, res) => {
+//   const userId = req.params.userId;
+//   const referralId = req.params.referralId;
+//   const { status } = req.body;
+
+//   try {
+//     // Find the user profile by user ID
+//     const userProfile = await User.findById(userId);
+
+//     if (!userProfile) {
+//       return res.status(404).json({ message: "User profile not found" });
+//     }
+
+//     // Find the specific referral by its ID
+//     const referral = userProfile.refers.find((ref) => ref._id.toString() === referralId);
+
+//     if (!referral) {
+//       return res.status(404).json({ message: "Referral not found" });
+//     }
+
+//     // Update the status of the referral
+//     referral.status = status;
+
+//     // Save the updated user profile
+//     await userProfile.save();
+
+//     // Now, update the referral status for this referral in the `refers` array of every user
+//     const allUsers = await User.find({});
+
+//     for (const user of allUsers) {
+//       // Find the referral by its ID in the `refers` array of the current user
+//       const userReferral = user.refers.find((ref) => ref._id.toString() === referralId);
+
+//       if (userReferral) {
+//         // If the referral is found, update its status
+//         userReferral.status = status;
+//         await user.save();
+//       }
+//     }
+
+//     res.status(200).json({ message: "Referral status updated successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+// // user.js (controller)
+
+// const getUpdatedReferralStatus = async (req, res) => {
+//   const userId = req.params.userId;
+//   const referralId = req.params.referralId;
+
+//   try {
+//     // Find the user profile by user ID
+//     const userProfile = await User.findById(userId);
+
+//     if (!userProfile) {
+//       return res.status(404).json({ message: "User profile not found" });
+//     }
+
+//     // Find the specific referral by its ID
+//     const referral = userProfile.refers.find((ref) => ref._id.toString() === referralId);
+
+//     if (!referral) {
+//       return res.status(404).json({ message: "Referral not found" });
+//     }
+
+//     // Return the updated status of the referral
+//     res.status(200).json({ status: referral.status });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+module.exports = {
+  RegisterUser,
+  LoginUser,
+  DeleteUser,
+  GetUser,
+  PutUser,
+  postReferral,
+  successReferrals,
+  getAllReferrals,
+  ChangePassword,
+  putReferral
+  // updateReferralStatus,
+  // getUpdatedReferralStatus
+};

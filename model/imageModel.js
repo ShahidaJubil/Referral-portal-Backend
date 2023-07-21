@@ -17,11 +17,11 @@ const ImageSchema = new mongoose.Schema({
   },
   fname: {
     type: String,
-    default: "First Name",
+    default: "First name",
   },
   lname: {
     type: String,
-    default: "Last Name",
+    default: "Last name",
   },
   location: {
     type: String,
@@ -60,6 +60,10 @@ const ImageSchema = new mongoose.Schema({
       },
       rduration: {
         type: String,
+      },
+      rstatus:{
+        type:String,
+        // enum: ["Not Enrolled", "Processing", "Enrolled"]
       }
     }
   ],
@@ -80,9 +84,8 @@ const ImageSchema = new mongoose.Schema({
       points:{
         type:Number
       },
-      total:{
-        type:String
-      }
+      
+      
     }
   ],
   referralLink: { type: String, unique: true },

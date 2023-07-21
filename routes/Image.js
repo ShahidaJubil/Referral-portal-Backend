@@ -49,6 +49,7 @@ router.route('/upload').post(upload.single('imageData'),(req,res,next)=>{
             document:result
         })
     })
+
     .catch((error)=>{
         next(error)
     })
@@ -96,6 +97,7 @@ router.route('/update/:id').put(upload.single('imageData'), (req, res, next) => 
       email,
       location,
       phone,
+      
     };
   
     if (req.file) {
